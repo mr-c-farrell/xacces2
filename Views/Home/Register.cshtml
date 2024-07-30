@@ -1,0 +1,25 @@
+﻿@model RegisterRequest
+@{
+    ViewBag.Title = "Register";
+}
+
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <div class="fadeIn first">
+            <img src="~/images/xaccess.png" id="icon" alt="XACCESS" />
+        </div>
+        @using (Html.BeginForm("RegisterEmail", "Home", FormMethod.Post, new { id = "registerForm" }))
+        {
+            <div>
+                @Html.TextBoxFor(l => l.UserName, new { @placeholder = "Email Address", @class = "fadeIn second", @id = "emailAddress" })
+            </div>
+            <div>
+                @Html.TextBoxFor(l => l.XNumber, new { @placeholder = "XNumber", @class = "fadeIn second", @id = "dealNumber" })
+            </div>
+            <input type="submit" class="fadeIn third" name="register" value="Register">
+            <br />
+            <br />
+            <img src="~/images/xstra.png" id="logo" style="height:50px" alt="Powered by Xstra" />
+        }
+    </div>
+</div>
