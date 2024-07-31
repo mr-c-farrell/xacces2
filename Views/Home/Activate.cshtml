@@ -1,0 +1,26 @@
+﻿@model string
+@{
+    ViewBag.Title = "Activate";
+}
+
+
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <div class="fadeIn first">
+            <br>
+            <img src="~/images/xaccess.png" id="icon" alt="XAccess" style="margin-left: -30px" />
+        </div>
+        <div class"fadeIn first">
+            <ol align="left" style="margin-left: 70px">
+                <li>Open your favourite Authenticator App</li>
+                <li>Scan the Barcode below</li>
+                <li>Use the OTP code to login!</li>
+            </ol>
+        </div>
+        <div class="fadeIn second"><img src="@Url.Action("GenerateQrCode", "Home", new { @token = Model })" height="300" width="300" alt="qr code" /></div>
+        <br>
+        <h2 style="color:darkred;">If the QR code is not visible above, it may have expired or has already been used. Please contact XSTRA Support on 1300 555 920</h2>
+        <br>
+        <img src="~/images/xstra.png" id="logo" style="height:50px" alt="Powered by Xstra" />
+    </div>
+</div>

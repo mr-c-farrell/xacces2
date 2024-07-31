@@ -8,7 +8,7 @@
         <div class="fadeIn first">
             <img src="~/images/xaccess.png" id="icon" alt="XACCESS" />
         </div>
-        @using (Html.BeginForm("RegisterEmail", "Home", FormMethod.Post, new { id = "registerForm" }))
+        @using (Html.BeginForm("RegisterForXAccess", "Home", FormMethod.Post, new { id = "RegisterForXAccess" }))
         {
             <div>
                 @Html.TextBoxFor(l => l.UserName, new { @placeholder = "Email Address", @class = "fadeIn second", @id = "emailAddress" })
