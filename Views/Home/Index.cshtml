@@ -52,13 +52,14 @@
 
 <div class="wrapper fadeInDown">
     <div id="formContent">
+        <div id="spacer"><p>&nbsp;</p></div>
         <div class="fadeIn first">
             <img src="~/images/xaccess.png" id="icon" alt="XACCESS" />
         </div>
         @using (Html.BeginForm("CheckCode", "Home", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
         {            
             <div>
-                @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Mobile Number / Email Address", @class = "fadeIn second", @id = "emailAddress" })
+                @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Mobile Number or Email Address", @class = "fadeIn second", @id = "emailAddress" })
                 @Html.HiddenFor(l => l.IPAddress, new { @id = "ip-address", @placeholder = "IP Address" })
             </div>
             <div>
