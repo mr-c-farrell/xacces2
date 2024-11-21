@@ -58,7 +58,7 @@
         @using (Html.BeginForm("CheckCode", "Home", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
         {            
             <div>
-                @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Email Address / Mobile Number", @class = "fadeIn second", @id = "emailAddress" })
+                @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Mobile Number / Email Address", @class = "fadeIn second", @id = "emailAddress" })
                 @Html.HiddenFor(l => l.IPAddress, new { @id = "ip-address", @placeholder = "IP Address" })
             </div>
             <div>

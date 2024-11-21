@@ -2,11 +2,20 @@
 @{
     ViewBag.Title = "Activate";
 }
+<script>
+    $(document).ready(function () {
+        $.getJSON('https://jsonip.com?callback=?', function (data) {
+            $("#ip-address").val(data.ip);
+            
+        });
+    });
+</script>
 
 
 <div class="wrapper fadeInDown">
     <div id="formContent">
         <div class="fadeIn first">
+            <input type="hidden" name="ip-address" id="ip-address"/>
             <br>
             <img src="~/images/xaccess.png" id="icon" alt="XAccess" style="margin-left: -30px" />
         </div>
