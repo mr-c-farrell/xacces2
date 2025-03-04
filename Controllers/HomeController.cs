@@ -71,29 +71,38 @@ namespace XAccess2.Controllers
         }
         public ActionResult GenerateQrCode(string token)
         {
-            var client = new HttpClient();
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/GenXAuth");
-            XGenAuthRequest xGen = new XGenAuthRequest();
-            xGen.TopSec = token;
-            var content = new StringContent(JsonConvert.SerializeObject(xGen), null, "application/json");
-            httpRequest.Content = content;
-            var response = client.SendAsync(httpRequest).Result;
-            var responseString = response.Content.ReadAsStringAsync().Result;
-            var result = JsonConvert.DeserializeObject<AuthResponse>(responseString);
-            if (result != null)
+            try
             {
-                string otpDetail = "otpauth://totp/XACCESS%20-%20X" + result.XNumber.ToString() + "?secret=" + result.TopSec + "&issuer=XACCESS%20by%20Xstra%20Group%20Pty%20Ltd";
+                var client = new HttpClient();
+                var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/GenXAuth");
+                XGenAuthRequest xGen = new XGenAuthRequest();
+                xGen.TopSec = token;
+                var content = new StringContent(JsonConvert.SerializeObject(xGen), null, "application/json");
+                httpRequest.Content = content;
+                var response = client.SendAsync(httpRequest).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
+                var result = JsonConvert.DeserializeObject<AuthResponse>(responseString);
+                if (result != null)
+                {
+                    LogAssist.LogMessage(string.Format("XNumber {0}, TopSec {1}", result.XNumber, result.TopSec, "GenerateQR"));
+                    string otpDetail = "otpauth://totp/XACCESS%20-%20X" + result.XNumber.ToString() + "?secret=" + result.TopSec + "&issuer=XACCESS%20by%20Xstra%20Group%20Pty%20Ltd";
 
-                QRCodeGenerator qrGenerator = new QRCodeGenerator();
-                QRCodeData qrCodeData = qrGenerator.CreateQrCode(otpDetail, QRCodeGenerator.ECCLevel.Q);
+                    QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                    QRCodeData qrCodeData = qrGenerator.CreateQrCode(otpDetail, QRCodeGenerator.ECCLevel.Q);
 
-                PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
-                byte[] byteArray = qrCode.GetGraphic(20, true);
+                    PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+                    byte[] byteArray = qrCode.GetGraphic(20, true);
 
-                return File(byteArray, "image/jpeg");
+                    return File(byteArray, "image/jpeg");
+                }
+
+                return Ok();
             }
-
-            return Ok();
+            catch (Exception e)
+            {
+                LogAssist.LogError(e, "QR Email");
+                return Ok();
+            }
         }
 
         public ActionResult RegisterForXAccess(RegisterRequest registerRequest)
