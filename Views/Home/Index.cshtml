@@ -56,7 +56,7 @@
         <div class="fadeIn first">
             <img src="~/images/xaccess.png" id="icon" alt="XACCESS" />
         </div>
-        @using (Html.BeginForm("CheckCode", "Home", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
+        @using (Html.BeginForm("Authenticate", "ApiProxy", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
         {            
             <div>
                 @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Mobile Number or Email Address", @class = "fadeIn second", @id = "emailAddress" })

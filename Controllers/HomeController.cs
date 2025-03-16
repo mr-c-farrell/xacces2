@@ -57,7 +57,7 @@ namespace XAccess2.Controllers
 
 
             var client = new HttpClient();
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/Authenticate");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/Authenticate");
             var content = new StringContent(JsonConvert.SerializeObject(request), null, "application/json");
             httpRequest.Content = content;
             var response = await client.SendAsync(httpRequest);
@@ -74,7 +74,7 @@ namespace XAccess2.Controllers
             try
             {
                 var client = new HttpClient();
-                var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/GenXAuth");
+                var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/GenXAuth");
                 XGenAuthRequest xGen = new XGenAuthRequest();
                 xGen.TopSec = token;
                 var content = new StringContent(JsonConvert.SerializeObject(xGen), null, "application/json");
@@ -111,7 +111,7 @@ namespace XAccess2.Controllers
             var token = Base32Encoding.ToString(key);
             registerRequest.Token = token;
             var client = new HttpClient();
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/XRegister");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/XRegister");
             var content = new StringContent(JsonConvert.SerializeObject(registerRequest), null, "application/json");
             httpRequest.Content = content;
             var response = client.SendAsync(httpRequest).Result;
@@ -127,7 +127,7 @@ namespace XAccess2.Controllers
         {
             var client = new HttpClient();
             if(request.emailAddress is null) request.emailAddress = string.Empty;
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapi.x.direct/CheckMailDomain");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/CheckMailDomain");
             var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
             httpRequest.Content = content;
             var response = await client.SendAsync(httpRequest);
