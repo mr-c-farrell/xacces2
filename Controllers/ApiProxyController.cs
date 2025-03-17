@@ -22,14 +22,15 @@ namespace XAccess2.Controllers
 
         [HttpPost]
         [Route("validate-identifier/{identifier}")]
-        public async Task<IHttpActionResult> Validate(string identifier)
+        public async Task<IHttpActionResult> Validate(ValidationRequest valRequest)
         {
             try
             {
                 var apiKey = _configuration["AppSettings:XAccessApiKey"];
+                //identifier = Request.QueryString("selected_index")
                 var request = new ValidationRequest
                 {
-                    identifier = identifier
+                    identifier = valRequest.identifier
                 };
 
                 // Log or debug - make sure the API key isn't empty/null

@@ -11,11 +11,14 @@
 
         $("#emailAddress").on("blur", function () {
             var checkEmail = $("#emailAddress").val();
+            console.log(checkEmail);
             if (checkEmail.length > 0) {
                 $.ajax({
-                    url: "/api/ApiProxy/validate-identifier/" + encodeURIComponent(checkEmail),
+                    url: '@Url.Action("Validate", "ApiProxy")',
                     type: "POST",
+                    data: JSON.stringify({identifier: checkEmail}),
                     contentType: "application/json",
+                    traditional:true,
                     success: function (response) {
                         if (response.requiresMFA) {
                             $("#mfa").css("visibility", "visible");
