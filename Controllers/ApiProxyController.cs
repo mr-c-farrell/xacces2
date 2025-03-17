@@ -21,12 +21,16 @@ namespace XAccess2.Controllers
         }
 
         [HttpPost]
-        [Route("Authenticate")]
-        public async Task<IHttpActionResult> Authenticate(AuthRequest request)
+        [Route("validate-identifier/{identifier}")]
+        public async Task<IHttpActionResult> Validate(string identifier)
         {
             try
             {
                 var apiKey = _configuration["AppSettings:XAccessApiKey"];
+                var request = new ValidationRequest
+                {
+                    identifier = identifier
+                };
 
                 // Log or debug - make sure the API key isn't empty/null
                 if (string.IsNullOrEmpty(apiKey))
@@ -37,7 +41,7 @@ namespace XAccess2.Controllers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-                    var requestUrl = $"https://xaccessapidev.x.direct/api/Authenticate";
+                    var requestUrl = $"https://xaccessapidev.x.direct/api/Validate";
 
                     var content = new StringContent(JsonConvert.SerializeObject(request), System.Text.Encoding.UTF8, "application/json");
                     var response = await client.PostAsync(requestUrl, content);
@@ -46,15 +50,16 @@ namespace XAccess2.Controllers
                     {
                         // deserialize the response content
                         var responseContent = await response.Content.ReadAsStringAsync();
-                        var authResponse = JsonConvert.DeserializeObject<AuthStatusResponse>(responseContent);
+                        var authResponse = JsonConvert.DeserializeObject<ValidationResponse>(responseContent);
                         // redirect to the URL provided in the response
-                        return Redirect(authResponse.RedirectURL);
+                        return Ok(new { authResponse.RequiresMFA, authResponse.RequiresXNumber });
                     }
                     return Content(response.StatusCode, response.ReasonPhrase);
                 }
             }
             catch (Exception ex)
             {
+                // Log the exception message for troubleshooting
                 return InternalServerError(ex);
             }
         }

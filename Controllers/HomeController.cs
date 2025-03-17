@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting.Internal;
+//using System.Web.Http;
 using Newtonsoft.Json;
 using OtpNet;
 using QRCoder;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Net;
 using System.Text;
 using XAccess2.Models;
 //using static System.Net.Mime.MediaTypeNames;
@@ -17,10 +22,12 @@ namespace XAccess2.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -49,31 +56,44 @@ namespace XAccess2.Controllers
         [HttpPost]
         public async Task<IActionResult> CheckCode(AuthRequest request)
         {
+            var apiKey = _configuration["AppSettings:XAccessApiKey"];
+
+            // Log or debug - make sure the API key isn't empty/null
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return Content("API key is missing in configuration");
+            }
+
+            var baseAddress = _configuration["AppSettings:BaseUrl"];
             string ip = HttpContext.Connection.RemoteIpAddress.ToString();
             request.IPAddress = ip;
-            if (request.DealNumber is null) request.DealNumber = string.Empty;
-            if (request.EmailAddress is null) request.EmailAddress = string.Empty;
-            if (request.MFACode is null) request.MFACode = string.Empty;
 
 
-            var client = new HttpClient();
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/Authenticate");
-            var content = new StringContent(JsonConvert.SerializeObject(request), null, "application/json");
-            httpRequest.Content = content;
-            var response = await client.SendAsync(httpRequest);
-            var responseString = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<AuthStatusResponse>(responseString);
-            if (result != null)
+            using (var client = new HttpClient())
             {
-                if (result.RedirectURL == "https://xaccess.x.direct") return View("Index"); else return Redirect(result.RedirectURL);
-            }
-            else return View("Index");
+                client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+                var requestUrl = $"{baseAddress}Authenticate";
+
+                var content = new StringContent(JsonConvert.SerializeObject(request), System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(requestUrl, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    // deserialize the response content
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var authResponse = JsonConvert.DeserializeObject<AuthStatusResponse>(responseContent);
+                    // redirect to the URL provided in the response
+                    return Redirect(authResponse.RedirectURL);
+                }
+                else return View("Index");
+            } 
+            
         }
         public ActionResult GenerateQrCode(string token)
         {
             try
             {
                 var client = new HttpClient();
+                
                 var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/GenXAuth");
                 XGenAuthRequest xGen = new XGenAuthRequest();
                 xGen.TopSec = token;
@@ -123,24 +143,38 @@ namespace XAccess2.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> CheckMailDomain(MailRequest request)
+        public async Task<JsonResult> CheckMailDomain(ValidationRequest request)
         {
-            var client = new HttpClient();
-            if(request.emailAddress is null) request.emailAddress = string.Empty;
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://xaccessapidev.x.direct/CheckMailDomain");
-            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
-            httpRequest.Content = content;
-            var response = await client.SendAsync(httpRequest);
-            var responseString = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<MailDomainResponse>(responseString);
-            if (result != null)
+            var apiKey = _configuration["AppSettings:XAccessApiKey"];
+
+            // Log or debug - make sure the API key isn't empty/null
+            if (string.IsNullOrEmpty(apiKey))
             {
-                return Json(result);
+                return Json(new { error = "API key is missing in configuration" });
             }
-            return null;
+
+            var baseAddress = _configuration["AppSettings:BaseUrl"];
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+                var requestUrl = $"{baseAddress}Validate";
+
+                if (request.identifier is null) request.identifier = string.Empty;
+                var httpRequest = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+                var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+                httpRequest.Content = content;
+                var response = await client.SendAsync(httpRequest);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<ValidationResponse>(responseString);
+                if (result != null)
+                {
+                    return Json(result);
+                }
+                return Json(new { error = "Failed to user record" });
+            }
         }
 
-            [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

@@ -10,32 +10,28 @@
         });
 
         $("#emailAddress").on("blur", function () {
-            var request;
             var checkEmail = $("#emailAddress").val();
-            if (window.XMLHttpRequest) {
-                request = new XMLHttpRequest();
-            }
-            else if (window.ActiveXObject) {
-                console.log("old")
-                request = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            if (request != null) {
-                var url = "https://xaccessapi.x.direct/CheckMailDomain";
-                request.open("POST", url);
-                let data = JSON.stringify({ "emailAddress": checkEmail });
-                request.setRequestHeader("Content-Type", "application/json");
-                request.onreadystatechange = function () {
-                    if (request.readyState == 4 && request.status == 200) {
-                        var response = JSON.parse(request.responseText);
-                        if (response.requiresXNumber == true) {
-                            $("#dealNumber").css("visibility", "visible");
+            if (checkEmail.length > 0) {
+                $.ajax({
+                    url: "/ApiProxy/Validate/" + encodeURIComponent(checkEmail),
+                    type: "POST",
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.requiresMFA) {
+                            $("#mfa").css("visibility", "visible");
+                        } else {
+                            $("#mfa").css("visibility", "hidden");
                         }
-                        else {
+                        if (response.requiresXNumber) {
+                            $("#dealNumber").css("visibility", "visible");
+                        } else {
                             $("#dealNumber").css("visibility", "hidden");
                         }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error: " + error);
                     }
-                };
-                request.send(data);
+                });
             }
         });
 
@@ -56,14 +52,14 @@
         <div class="fadeIn first">
             <img src="~/images/xaccess.png" id="icon" alt="XACCESS" />
         </div>
-        @using (Html.BeginForm("Authenticate", "ApiProxy", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
+        @using (Html.BeginForm("CheckCode", "Home", FormMethod.Post, new { id = "loginForm", autocomplete = "off" }))
         {            
             <div>
                 @Html.TextBoxFor(l => l.EmailAddress, new { @placeholder = "Mobile Number or Email Address", @class = "fadeIn second", @id = "emailAddress" })
                 @Html.HiddenFor(l => l.IPAddress, new { @id = "ip-address", @placeholder = "IP Address" })
             </div>
             <div>
-                @Html.TextBoxFor(l => l.MFACode, new { @placeholder = "One Time Passcode", @class = "fadeIn second", @id = "mfa" })
+                @Html.TextBoxFor(l => l.MFACode, new { @placeholder = "One Time Passcode", @class = "fadeIn second", @style="visibility: hidden", @id = "mfa" })
             </div>
             <div>
                 @Html.TextBoxFor(l => l.DealNumber, new { @placeholder = "XNumber", @class = "fadeIn second", @style = "visibility:hidden", @id = "dealNumber" })
