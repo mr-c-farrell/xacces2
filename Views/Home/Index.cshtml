@@ -13,7 +13,7 @@
             var checkEmail = $("#emailAddress").val();
             if (checkEmail.length > 0) {
                 $.ajax({
-                    url: "/ApiProxy/Validate/" + encodeURIComponent(checkEmail),
+                    url: "/api/ApiProxy/validate-identifier/" + encodeURIComponent(checkEmail),
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {

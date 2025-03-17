@@ -4,10 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddControllers(); // Add this line to include API controllers
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
-
 
 var app = builder.Build();
 
@@ -28,6 +27,10 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+
+// Add this line to map attribute-routed API controllers
+app.MapControllers();
 
 app.Run();

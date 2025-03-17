@@ -19,10 +19,12 @@ using XAccess2.Models;
 
 namespace XAccess2.Controllers
 {
+    
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration;
+
 
         public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
@@ -30,6 +32,7 @@ namespace XAccess2.Controllers
             _configuration = configuration;
         }
 
+        
         public IActionResult Index()
         {
             return View();
